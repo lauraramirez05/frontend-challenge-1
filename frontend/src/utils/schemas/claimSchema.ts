@@ -18,7 +18,7 @@ const baseNameSchema = z
   .regex(/^[A-Za-z\s&.-]+$/, { message: "Name can only contain letters, numbers, spaces, and & or -." });
 
 export const claimSchema = z.object({
-  claim_id: z.number().int({ message: "Provider ID must be an integer." }).min(10000000000, { message: "Provider ID must be at least 12 digits long." }),
+  claim_id: z.number().int({ message: "Provider ID must be an integer." }).min(100000000000, { message: "Claim ID must be at least 12 digits long." }),
   subscriber_id: z.string().regex(/^[a-zA-Z]\d{7}[a-zA-Z]{2}$/, {
     message: "Invalid Subscriber ID. It must be exactly 10 characters long, start with a letter, followed by 7 digits, and end with 2 letters (e.g., A1234567BC).",
   }),

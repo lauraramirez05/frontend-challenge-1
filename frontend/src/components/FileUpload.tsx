@@ -23,7 +23,6 @@ const FileUpload = observer(() => {
           const allRows = [];
           results.data.forEach((row) => {
             const normalizedRow = {};
-
             Object.keys(row).forEach((key) => {
               const normalizedKey = key.toString().toLowerCase().replace(/\s+/g, "_");
               normalizedRow[normalizedKey] = row[key];
@@ -33,20 +32,22 @@ const FileUpload = observer(() => {
 
             if (validationResult.success) {
               allRows.push({
+                id: crypto.randomUUID(),
                 data: validationResult.data,
                 warning: null,
               });
             } else {
-              console.log(validationResult);
-              console.log("ERROR", [row, validationResult.error.message]);
+              // console.log(validationResult.error.issues);
+              // console.log("ERROR", [row, validationResult.error.message]);
               allRows.push({
+                id: crypto.randomUUID(),
                 data: normalizedRow,
-                warning: `Validation error: ${validationResult.error.message}`,
+                warning: validationResult.error.issues,
               });
             }
           });
 
-          const parsedData = {
+          const parsedData: File = {
             name: file.name,
             data: allRows,
           };
@@ -54,6 +55,8 @@ const FileUpload = observer(() => {
           myStore.addFile(parsedData);
           myStore.setGridLoading(true);
           myStore.setCurrentFile(parsedData);
+
+          console.log(myStore.currentFile);
         },
 
         error: (error) => {

@@ -12,6 +12,9 @@ class MyStore {
   files: File[] = [];
   currentFile: File | null = null;
   gridLoading: boolean | null = false;
+  alertActive: boolean = false;
+  alertMessage: string = "";
+  warningsMap = {};
 
   constructor() {
     makeAutoObservable(this);
@@ -47,9 +50,34 @@ class MyStore {
   setCurrentFile(file: File | null) {
     this.currentFile = file;
   }
+  updateField(rowIndex, fieldKey, newValue, warning = null) {
+    // Clone the currentFile data to trigger reactivity
+    const updatedData = [...this.currentFile.data];
+    const row = updatedData[rowIndex];
+
+    if (row) {
+      row.data = { ...row.data, [fieldKey]: newValue };
+      if (warning) {
+        row.warning = warning;
+      } else {
+        row.warning = row.warning?.filter((w) => !w.path.includes(fieldKey)); // Clear previous warnings for the field if resolved
+      }
+    }
+
+    // Update currentFile with new reference to trigger reactivity
+    this.currentFile = { ...this.currentFile, data: updatedData };
+  }
 
   setGridLoading(value) {
     this.gridLoading = value;
+  }
+
+  setAlertActive(value) {
+    this.alertActive = value;
+  }
+
+  setAlertMessage(value) {
+    this.alertMessage = value;
   }
 }
 
