@@ -4,13 +4,10 @@ import { Text, Group, Button, rem, useMantineTheme } from "@mantine/core";
 import { Dropzone, DropzoneAccept, DropzoneIdle, MIME_TYPES } from "@mantine/dropzone";
 import { IconCloudUpload, IconX, IconDownload } from "@tabler/icons-react";
 import Papa from "papaparse";
-import myStore from "~/store";
+import myStore from "../store";
 import FileList from "./FileList";
-
-interface ParsedFile {
-  name: string;
-  data: Record<string, any>[]; // Using Record to allow any keys
-}
+import { claimSchema } from "~/utils/schemas/claimSchema";
+import { File } from "../store";
 
 const FileUpload = observer(() => {
   const theme = useMantineTheme();
@@ -23,12 +20,40 @@ const FileUpload = observer(() => {
         dynamicTyping: true,
         skipEmptyLines: true,
         complete: (results) => {
-          const parsedData: ParsedFile = {
+          const allRows = [];
+          results.data.forEach((row) => {
+            const normalizedRow = {};
+
+            Object.keys(row).forEach((key) => {
+              const normalizedKey = key.toString().toLowerCase().replace(/\s+/g, "_");
+              normalizedRow[normalizedKey] = row[key];
+            });
+
+            const validationResult = claimSchema.safeParse(normalizedRow);
+
+            if (validationResult.success) {
+              allRows.push({
+                data: validationResult.data,
+                warning: null,
+              });
+            } else {
+              console.log(validationResult);
+              console.log("ERROR", [row, validationResult.error.message]);
+              allRows.push({
+                data: normalizedRow,
+                warning: `Validation error: ${validationResult.error.message}`,
+              });
+            }
+          });
+
+          const parsedData = {
             name: file.name,
-            data: results.data,
+            data: allRows,
           };
 
           myStore.addFile(parsedData);
+          myStore.setGridLoading(true);
+          myStore.setCurrentFile(parsedData);
         },
 
         error: (error) => {
@@ -36,8 +61,6 @@ const FileUpload = observer(() => {
         },
       });
     });
-
-    console.log("Files Uploaded", myStore.files);
   };
 
   return (
@@ -77,6 +100,7 @@ const FileUpload = observer(() => {
       <Button className="absolute w-[250px] left-1/2 -translate-x-1/2 -bottom-[20px]" size="md" radius="xl" onClick={() => openRef.current?.()}>
         Select files
       </Button>
+      {myStore.currentFile && <h3>{myStore.currentFile.name}</h3>}
 
       <FileList />
     </div>

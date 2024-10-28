@@ -1,5 +1,5 @@
 import { Button, Group, Text } from "@mantine/core";
-import myStore from "~/store";
+import myStore from "../store";
 import { observer } from "mobx-react-lite";
 
 const FileList = observer(() => {
