@@ -1,10 +1,13 @@
+import FileUpload from "~/components/FileUpload";
+
 export default function MainPage() {
   return (
-    <div className="flex h-full items-center justify-center text-sm text-gray-400 text-center">
-      <div className="space-y-2">
-        <p>Good luck!</p>
-        <p>Read the README.md very carfully.</p>
+    <>
+      <div className="flex h-full items-center justify-center text-center">
+        <div className="space-y-2">
+          <FileUpload />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
